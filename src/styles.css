@@ -96,3 +96,33 @@ body {
   box-shadow: 0 8px 25px var(--primary-glow);
   filter: brightness(1.1);
 }
+
+/* ── Gradiente de texto reutilizable ────────────── */
+.text-gradient {
+  background: linear-gradient(90deg, #ffffff 38%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Botón contorno (secundario) ────────────────── */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem 1.8rem;
+  background: transparent;
+  color: var(--text-main);
+  font-weight: 600;
+  border-radius: var(--radius);
+  border: 1px solid rgba(248, 250, 252, 0.3);
+  cursor: pointer;
+  transition: var(--transition);
+  backdrop-filter: blur(4px);
+}
+
+.btn-outline:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 12px var(--primary-glow);
+}

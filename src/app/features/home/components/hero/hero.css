@@ -1,0 +1,79 @@
+/* Contenedor principal del Hero */
+.hero {
+    position: relative;
+    width: 100%;
+    height: 85vh;
+    /* Ocupa el 85% del alto de la pantalla */
+    background-size: cover;
+    background-position: center top;
+    display: flex;
+    align-items: flex-end;
+    /* Alineamos el contenido hacia abajo */
+}
+
+/* El secreto de la Legibilidad: El Overlay */
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    /* shorthand para top:0, right:0, bottom:0, left:0 */
+    /* Degradado que va de negro sólido en la base a transparente arriba */
+    background: linear-gradient(to top,
+            var(--bg-color) 0%,
+            rgba(10, 10, 10, 0.8) 30%,
+            transparent 100%);
+    z-index: 1;
+}
+
+/* El contenido (texto y botones) */
+.hero-content {
+    position: relative;
+    z-index: 2;
+    /* Debe estar por encima del overlay */
+    padding: var(--spacing-lg) var(--spacing-md);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.hero-info {
+    max-width: 600px;
+    /* Evitamos que el texto cruce toda la pantalla */
+}
+
+.badge {
+    display: inline-block;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hero-title {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    line-height: 1.1;
+    margin-bottom: 1rem;
+}
+
+.hero-overview {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+    /* Limita el texto a 3 líneas y pone '...' si es más largo */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    /* Propiedad estándar moderna (soporte universal) */
+    line-clamp: 3;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+}

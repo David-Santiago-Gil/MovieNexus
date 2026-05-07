@@ -1,0 +1,27 @@
+<!-- Inyectamos el fondo dinámicamente usando la variable de TypeScript -->
+<section class="hero" [style.background-image]="'url(' + backdropUrl + ')'">
+
+    <!-- Este div crea un degradado oscuro para que el texto sea legible -->
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+        <div class="hero-info">
+            <span class="badge">Película Destacada</span>
+
+            <!-- Usamos nuestra clase reutilizable del Sistema de Diseño (Día 3) -->
+            <h1 class="hero-title text-gradient">{{ movie.title }}</h1>
+
+            <p class="hero-overview">{{ movie.overview }}</p>
+
+            <div class="hero-actions">
+                <!-- Reutilizamos nuestros botones premium -->
+                <button class="btn-premium">
+                    <span>Reproducir</span>
+                </button>
+                <button class="btn-outline">
+                    <span>Más información</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>

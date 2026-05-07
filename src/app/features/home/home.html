@@ -1,8 +1,8 @@
-<div class="hero">
-  <h1 class="hero-title">Bienvenido a <span class="gradient-text">MovieNexus</span></h1>
-  <p class="hero-subtitle">
-    Explora las películas más populares, busca tus favoritas y mantente
-    al día con los últimos estrenos.
-  </p>
-  <button class="hero-btn">Empezar a Explorar</button>
-</div>
+<!-- Verificamos si ya llegó la información de la API usando el control flow -->
+@if (featuredMovie(); as movie) {
+<!-- Padre (Home) pasándole la variable 'movie' al Hijo (Hero) -->
+<app-hero [movie]="movie"></app-hero>
+} @else {
+<!-- Mientras llega la información, mostramos un estado de carga (Skeleton) -->
+<div class="loading-hero">Cargando...</div>
+}
