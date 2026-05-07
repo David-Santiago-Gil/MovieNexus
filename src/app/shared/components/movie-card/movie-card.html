@@ -1,0 +1,14 @@
+<div class="movie-card">
+    <div class="card-image-container">
+        <img [src]="posterUrl" [alt]="movie.title" class="card-image" loading="lazy">
+    </div>
+
+    <div class="card-overlay">
+        <h3 class="movie-title">{{ movie.title }}</h3>
+        <div class="movie-rating">
+            <span class="rating-icon">⭐</span>
+            <!-- Usamos un Pipe para limitar los decimales de la puntuación -->
+            <span>{{ movie.vote_average | number:'1.1-1' }}</span>
+        </div>
+    </div>
+</div>

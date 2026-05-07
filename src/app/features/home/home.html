@@ -1,8 +1,14 @@
-<!-- Verificamos si ya llegó la información de la API usando el control flow -->
 @if (featuredMovie(); as movie) {
-<!-- Padre (Home) pasándole la variable 'movie' al Hijo (Hero) -->
 <app-hero [movie]="movie"></app-hero>
 } @else {
-<!-- Mientras llega la información, mostramos un estado de carga (Skeleton) -->
-<div class="loading-hero">Cargando...</div>
+<div class="loading-hero"></div>
 }
+
+<div class="home-sections">
+  <!-- Pasamos los datos de las Signals a los componentes hijos -->
+  <app-movie-slider title="Tendencias de Hoy" [movies]="trendingMovies()">
+  </app-movie-slider>
+
+  <app-movie-slider title="Las más Populares" [movies]="popularMovies()">
+  </app-movie-slider>
+</div>

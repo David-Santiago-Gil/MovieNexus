@@ -1,0 +1,14 @@
+<section class="slider-container">
+    @if (title) {
+    <h2 class="slider-title">{{ title }}</h2>
+    }
+
+    <div class="slider-track">
+        <!-- NUEVO CONTROL FLOW DE ANGULAR -->
+        @for (movie of movies; track movie.id) {
+        <app-movie-card [movie]="movie"></app-movie-card>
+        } @empty {
+        <p>Cargando películas o no hay resultados...</p>
+        }
+    </div>
+</section>
