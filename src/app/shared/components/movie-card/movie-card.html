@@ -1,4 +1,4 @@
-<div class="movie-card">
+<div class="movie-card" [routerLink]="['/movie', movie.id]">
     <div class="card-image-container">
         <img [src]="posterUrl" [alt]="movie.title" class="card-image" loading="lazy">
     </div>

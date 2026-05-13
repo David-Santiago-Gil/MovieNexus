@@ -11,6 +11,7 @@ import { Movie } from '../../core/models/movie.model';
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
+
 export class Home implements OnInit {
   private movieService = inject(MovieService);
 

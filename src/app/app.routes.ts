@@ -7,6 +7,10 @@ export const routes: Routes = [
     title: 'Home | MovieNexus'
   },
   {
+    path: 'movie/:id', // :id es el parámetro dinámico
+    loadComponent: () => import('./features/movie-details/movie-details').then(m => m.MovieDetails)
+  },
+  {
     path: '**',
     redirectTo: ''
   }

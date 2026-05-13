@@ -1,0 +1,18 @@
+@if (movie(); as movieData) {
+  <div class="details-container">
+    <!-- Imagen de fondo (Backdrop) -->
+    <div class="backdrop-wrapper">
+        <img [src]="'https://image.tmdb.org/t/p/original' + movieData.backdrop_path" class="backdrop-image">
+        <div class="backdrop-overlay"></div>
+    </div>
+
+    <div class="content-wrapper">
+        <h1 class="movie-title">{{ movieData.title }}</h1>
+        <p class="overview">{{ movieData.overview }}</p>
+
+        <button class="back-button" onclick="history.back()">← Volver</button>
+    </div>
+  </div>
+} @else {
+  <div class="loading">Cargando detalles...</div>
+}
