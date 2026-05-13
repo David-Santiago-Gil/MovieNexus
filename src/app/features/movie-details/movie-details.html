@@ -1,18 +1,40 @@
-@if (movie(); as movieData) {
+<!-- El pipe '| async' se suscribe automáticamente a movieData$ -->
+<!-- 'as data' guarda el resultado en una variable local llamada 'data' -->
+@if (movieData$ | async; as data) {
   <div class="details-container">
     <!-- Imagen de fondo (Backdrop) -->
     <div class="backdrop-wrapper">
-        <img [src]="'https://image.tmdb.org/t/p/original' + movieData.backdrop_path" class="backdrop-image">
+        <img [src]="'https://image.tmdb.org/t/p/original' + data.details.backdrop_path" class="backdrop-image">
         <div class="backdrop-overlay"></div>
     </div>
 
     <div class="content-wrapper">
-        <h1 class="movie-title">{{ movieData.title }}</h1>
-        <p class="overview">{{ movieData.overview }}</p>
+        <!-- Para acceder a los detalles usamos data.details -->
+        <h1 class="movie-title">{{ data.details.title }}</h1>
+
+        <!-- Mostrar Géneros -->
+        <div class="genres">
+          @for (genre of data.details.genres; track genre.id) {
+            <span class="genre-tag">{{ genre.name }}</span>
+          }
+        </div>
+
+        <p class="overview">{{ data.details.overview }}</p>
+
+        <!-- Mostrar Elenco usando data.credits -->
+        <section class="movie-cast">
+          <h2>Elenco Principal</h2>
+          <div class="cast-track">
+            <!-- El pipe slice:0:15 recorta la lista a los primeros 15 actores -->
+            @for (actor of data.credits.cast | slice:0:15; track actor.id) {
+              <app-cast-card [actor]="actor"></app-cast-card>
+            }
+          </div>
+        </section>
 
         <button class="back-button" onclick="history.back()">← Volver</button>
     </div>
   </div>
 } @else {
-  <div class="loading">Cargando detalles...</div>
+  <div class="loading-state">Cargando detalles increíbles...</div>
 }

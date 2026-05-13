@@ -6,6 +6,8 @@ export interface Movie {
   backdrop_path: string;
   vote_average: number;
   release_date: string;
+  runtime?: number; // Duración en minutos
+  genres?: { id: number; name: string }[]; // Lista de géneros (Ej: Acción, Comedia)
 }
 
 export interface MovieResponse {
