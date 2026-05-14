@@ -56,3 +56,49 @@
     text-overflow: ellipsis;
     /* Pone "..." si el texto es muy largo para caber */
 }
+
+/* Botón de Favorito */
+.favorite-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  border: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+.movie-card:hover .favorite-btn {
+  opacity: 1;
+}
+
+.favorite-btn:hover {
+  transform: scale(1.15);
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.favorite-btn .heart-icon {
+  fill: rgba(255, 255, 255, 0.7);
+  transition: fill 0.2s ease, transform 0.2s ease;
+}
+
+.favorite-btn.active .heart-icon {
+  fill: #e50914; /* Rojo intenso */
+}
+
+.favorite-btn.active {
+  opacity: 1;
+}
+
+.favorite-btn:active .heart-icon {
+  transform: scale(1.3);
+}

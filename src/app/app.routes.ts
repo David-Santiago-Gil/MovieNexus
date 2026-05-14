@@ -11,6 +11,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/movie-details/movie-details').then(m => m.MovieDetails)
   },
   {
+    path: 'favorites',
+    loadComponent: () => import('./features/favorites/favorites').then(m => m.Favorites),
+    title: 'Mis Favoritos | MovieNexus'
+  },
+  {
     path: '**',
     redirectTo: ''
   }
