@@ -25,7 +25,6 @@
         <section class="movie-cast">
           <h2>Elenco Principal</h2>
           <div class="cast-track">
-            <!-- El pipe slice:0:15 recorta la lista a los primeros 15 actores -->
             @for (actor of data.credits.cast | slice:0:15; track actor.id) {
               <app-cast-card [actor]="actor"></app-cast-card>
             }
