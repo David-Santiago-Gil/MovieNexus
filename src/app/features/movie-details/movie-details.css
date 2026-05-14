@@ -77,7 +77,9 @@
 
 .movie-cast {
   margin-bottom: 2rem;
-  width: 100%;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  overflow: hidden;
 }
 
 .movie-cast h2 {
@@ -86,15 +88,21 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   color: #ddd;
+  padding: 0 4%;
 }
 
 .cast-track {
   display: flex;
-  gap: 1rem;
+  gap: 1.25rem;
+  padding: 0 4% 1.5rem 4%;
   overflow-x: auto;
-  padding-bottom: 1rem;
-  width: 100%;
-  justify-content: center;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Oculta scrollbar en Firefox */
+}
+
+/* Oculta scrollbar en Chrome/Safari */
+.cast-track::-webkit-scrollbar {
+  display: none;
 }
 
 .back-button {
