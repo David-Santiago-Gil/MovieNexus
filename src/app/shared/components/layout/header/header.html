@@ -1,9 +1,56 @@
-<header class="navbar">
-  <div class="logo">Movie<span>Nexus</span></div>
-  <nav class="nav-links">
-    <a href="#" class="active">Inicio</a>
-    <a href="#">Películas</a>
-    <a href="#">Buscar</a>
-    <a href="#">Favoritos</a>
-  </nav>
-</header>
+<nav class="navbar">
+  <div class="navbar-content">
+    <div class="logo">
+      <span class="logo-text">Movie<span>Nexus</span></span>
+    </div>
+
+    <ul class="nav-links">
+      <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Inicio</a></li>
+      <!-- El enlace de 'Buscar' fue eliminado, ahora está integrado en el Header -->
+      <li><a routerLink="/favorites" routerLinkActive="active">Favoritos</a></li>
+    </ul>
+
+    <!-- NUEVO: Contenedor del Buscador -->
+    <div class="search-container">
+
+      <!-- El Input -->
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Buscar películas..."
+        [value]="searchQuery()"
+        (input)="onSearchInput($event)"
+      >
+
+      <!-- Indicador de carga (Spinner) -->
+      @if (isSearching()) {
+        <div class="search-spinner"></div>
+      }
+
+      <!-- Dropdown de resultados -->
+      @if (searchResults().length > 0) {
+        <div class="search-results-dropdown">
+          @for (movie of searchResults(); track movie.id) {
+            <!-- Cada resultado es un enlace a los detalles -->
+            <a
+              [routerLink]="['/movie', movie.id]"
+              class="search-result-item"
+              (click)="closeSearch()"
+            >
+              <img
+                [src]="movie.poster_path ? 'https://image.tmdb.org/t/p/w92' + movie.poster_path : 'assets/no-poster.png'"
+                [alt]="movie.title"
+                class="result-poster"
+              >
+              <div class="result-info">
+                <span class="result-title">{{ movie.title }}</span>
+                <span class="result-year">{{ movie.release_date | date:'yyyy' }}</span>
+              </div>
+            </a>
+          }
+        </div>
+      }
+
+    </div>
+  </div>
+</nav>
