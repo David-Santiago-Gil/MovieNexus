@@ -129,3 +129,49 @@
   font-size: 1.5rem;
   color: #ccc;
 }
+
+/* === Sección de Tráiler === */
+.trailer-section {
+  margin-bottom: 3rem;
+}
+
+.trailer-section h2 {
+  font-size: 1.5rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+}
+
+/* Placeholders para Deferrable Views */
+.trailer-placeholder {
+  height: 400px;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  color: #888;
+  font-size: 1.1rem;
+}
+
+.cast-placeholder {
+  height: 200px;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  color: #888;
+  font-size: 1.1rem;
+}
+
+.defer-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  color: #e50914;
+  font-weight: bold;
+}

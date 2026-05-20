@@ -19,16 +19,51 @@
           }
         </div>
 
-        <p class="overview">{{ data.details.overview }}</p>
+        <section class="movie-info">
+          <h2>Sinopsis</h2>
+          <p class="overview">{{ data.details.overview }}</p>
+        </section>
 
-        <!-- Mostrar Elenco usando data.credits -->
+        <!-- CARGA DIFERIDA: El Tráiler (on viewport) -->
+        <section class="trailer-section">
+          <h2>Tráiler Oficial</h2>
+
+          @defer (on viewport) {
+            <!-- Este componente solo se descarga cuando esta sección entra en pantalla -->
+            <app-movie-trailer [movieId]="data.details.id"></app-movie-trailer>
+          } @placeholder (minimum 500ms) {
+            <!-- Lo que se muestra ANTES de que se cumpla la condición -->
+            <div class="trailer-placeholder">
+              <p>🎬 Haz scroll para ver el tráiler...</p>
+            </div>
+          } @loading {
+            <!-- Lo que se muestra DURANTE la descarga del componente -->
+            <div class="defer-spinner">Cargando reproductor...</div>
+          } @error {
+            <!-- Si la red falla al intentar descargar el componente -->
+            <p class="defer-error">Error al cargar el reproductor de video.</p>
+          }
+        </section>
+
+        <!-- CARGA DIFERIDA: El Elenco (on viewport) -->
         <section class="movie-cast">
           <h2>Elenco Principal</h2>
-          <div class="cast-track">
-            @for (actor of data.credits.cast | slice:0:15; track actor.id) {
-              <app-cast-card [actor]="actor"></app-cast-card>
-            }
-          </div>
+
+          @defer (on viewport) {
+            <div class="cast-track">
+              @for (actor of data.credits.cast | slice:0:15; track actor.id) {
+                <app-cast-card [actor]="actor"></app-cast-card>
+              } @empty {
+                <p>No hay información del elenco.</p>
+              }
+            </div>
+          } @placeholder {
+            <div class="cast-placeholder">
+              <p>👥 Haz scroll para ver el elenco...</p>
+            </div>
+          } @loading {
+            <div class="defer-spinner">Cargando elenco...</div>
+          }
         </section>
 
         <button class="back-button" onclick="history.back()">← Volver</button>
