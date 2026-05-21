@@ -1,6 +1,6 @@
 <div class="movie-card" [routerLink]="['/movie', movie.id]">
     <div class="card-image-container">
-        <img [src]="posterUrl" [alt]="movie.title" class="card-image" loading="lazy">
+        <img [src]="posterUrl" [alt]="movie.title" class="card-image" loading="lazy" [style.view-transition-name]="'movie-poster-' + movie.id">
         <!-- Botón de Favorito -->
         <button class="favorite-btn" [class.active]="isFavorite" (click)="toggleFavorite($event)">
             <svg class="heart-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">

@@ -9,14 +9,37 @@
     </div>
 
     <div class="content-wrapper">
-        <!-- Para acceder a los detalles usamos data.details -->
-        <h1 class="movie-title">{{ data.details.title }}</h1>
+        <!-- Contenedor Premium de Cabecera con Póster e Info -->
+        <div class="main-info-header">
+            <!-- El póster que vuela con View Transitions -->
+            <div class="poster-container">
+                <img [src]="'https://image.tmdb.org/t/p/w500' + data.details.poster_path" 
+                     [alt]="data.details.title" 
+                     class="poster-img" 
+                     [style.view-transition-name]="'movie-poster-' + data.details.id">
+            </div>
 
-        <!-- Mostrar Géneros -->
-        <div class="genres">
-          @for (genre of data.details.genres; track genre.id) {
-            <span class="genre-tag">{{ genre.name }}</span>
-          }
+            <!-- Detalles de la película al lado del póster -->
+            <div class="header-details">
+                <h1 class="movie-title">{{ data.details.title }}</h1>
+
+                <div class="meta-row">
+                    <span class="meta-item rating"><span class="star">⭐</span> {{ data.details.vote_average | number:'1.1-1' }}</span>
+                    @if (data.details.release_date) {
+                      <span class="meta-item">{{ data.details.release_date | slice:0:4 }}</span>
+                    }
+                    @if (data.details.runtime) {
+                      <span class="meta-item">⏳ {{ data.details.runtime }} min</span>
+                    }
+                </div>
+
+                <!-- Mostrar Géneros -->
+                <div class="genres">
+                  @for (genre of data.details.genres; track genre.id) {
+                    <span class="genre-tag">{{ genre.name }}</span>
+                  }
+                </div>
+            </div>
         </div>
 
         <section class="movie-info">
