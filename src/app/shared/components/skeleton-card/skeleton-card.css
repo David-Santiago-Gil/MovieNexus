@@ -1,0 +1,35 @@
+.skeleton-card {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+
+.skeleton-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3; /* Exactamente la misma proporción que el póster real */
+  border-radius: 12px;
+}
+
+.skeleton-info {
+  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-title {
+  width: 80%;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.skeleton-date {
+  width: 50%;
+  height: 14px;
+  border-radius: 4px;
+}

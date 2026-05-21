@@ -6,11 +6,13 @@ import { Hero } from './components/hero/hero';
 import { MovieSlider } from '../../shared/components/movie-slider/movie-slider';
 import { MovieCard } from '../../shared/components/movie-card/movie-card';
 import { Movie } from '../../core/models/movie.model';
+import { SkeletonHero } from '../../shared/components/skeleton-hero/skeleton-hero';
+import { SkeletonCard } from '../../shared/components/skeleton-card/skeleton-card';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [Hero, MovieSlider, MovieCard],
+  imports: [Hero, MovieSlider, MovieCard, SkeletonHero, SkeletonCard],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })

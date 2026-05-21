@@ -1,7 +1,9 @@
-@if (featuredMovie(); as movie) {
-<app-hero [movie]="movie"></app-hero>
+@if (trendingMovies().length > 0) {
+  <!-- Aquí va tu componente <app-hero> normal con la película destacada -->
+  <app-hero [movie]="trendingMovies()[0]"></app-hero>
 } @else {
-<div class="loading-hero"></div>
+  <!-- Mientras está vacío (cargando), mostramos el esqueleto -->
+  <app-skeleton-hero></app-skeleton-hero>
 }
 
 <div class="home-sections">
@@ -13,12 +15,20 @@
   </app-movie-slider>
 </div>
 
+<!-- Catálogo Infinito -->
 <section class="catalog-section">
   <h2 class="section-title">Explorar Catálogo</h2>
 
   <div class="movies-grid">
-    @for (movie of catalogMovies(); track movie.id) {
-      <app-movie-card [movie]="movie"></app-movie-card>
+    @if (catalogMovies().length > 0) {
+      @for (movie of catalogMovies(); track movie.id) {
+        <app-movie-card [movie]="movie"></app-movie-card>
+      }
+    } @else {
+      <!-- Mostramos 10 esqueletos de tarjeta para rellenar el espacio visualmente -->
+      @for (dummy of [1,2,3,4,5,6,7,8,9,10]; track dummy) {
+        <app-skeleton-card></app-skeleton-card>
+      }
     }
   </div>
 

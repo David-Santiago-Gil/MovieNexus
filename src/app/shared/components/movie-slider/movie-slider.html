@@ -4,11 +4,15 @@
     }
 
     <div class="slider-track">
-        <!-- NUEVO CONTROL FLOW DE ANGULAR -->
-        @for (movie of movies; track movie.id) {
-        <app-movie-card [movie]="movie"></app-movie-card>
-        } @empty {
-        <p>Cargando películas o no hay resultados...</p>
+        @if (movies.length > 0) {
+            @for (movie of movies; track movie.id) {
+                <app-movie-card [movie]="movie"></app-movie-card>
+            }
+        } @else {
+            <!-- Mostramos 5 esqueletos mientras carga -->
+            @for (dummy of [1,2,3,4,5]; track dummy) {
+                <app-skeleton-card></app-skeleton-card>
+            }
         }
     </div>
 </section>

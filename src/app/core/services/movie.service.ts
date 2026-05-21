@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { MovieResponse, Movie } from '../models/movie.model';
 import { CreditsResponse } from '../models/cast.model';
+//import { delay } from 'rxjs/operators'; // Descomentar para probar Skeleton Loaders
 
 @Injectable({ providedIn: 'root' })
 export class MovieService {
@@ -19,7 +20,9 @@ export class MovieService {
   getPopularMovies(page: number = 1) {
     return this.http.get<MovieResponse>(`${this.apiUrl}/movie/popular`, {
       params: { page: page.toString() }
-    });
+    })
+      // .pipe(delay(2000)) // <--- Descomenta esta línea para simular lentitud y ver los Skeleton Loaders
+      ;
   }
 
   getMovieById(id: string | number) {
