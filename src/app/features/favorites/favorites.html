@@ -11,11 +11,12 @@
       }
     </div>
   } @else {
-    <div class="empty-state">
-      <div class="empty-icon">🩶</div>
-      <h2>Tu lista está vacía</h2>
-      <p>Aún no has guardado ninguna película. ¡Explora el catálogo y añade tus favoritas!</p>
-      <a routerLink="/" class="explore-btn">Explorar Películas</a>
-    </div>
+    <app-empty-state
+      icon="❤️"
+      title="Aún no tienes favoritos"
+      message="Explora el catálogo y guarda las películas que más te gusten."
+      actionText="Explorar Películas"
+      actionLink="/home">
+    </app-empty-state>
   }
 </div>

@@ -1,12 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { MovieCard } from '../../shared/components/movie-card/movie-card';
-import { RouterLink } from '@angular/router';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state';
 
 @Component({
   selector: 'app-favorites',
   standalone: true,
-  imports: [MovieCard, RouterLink],
+  imports: [MovieCard, EmptyStateComponent],
   templateUrl: './favorites.html',
   styleUrl: './favorites.css',
 })

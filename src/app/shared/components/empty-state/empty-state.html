@@ -1,0 +1,18 @@
+<div class="empty-state-container">
+  <!-- Imagen opcional o ícono -->
+  @if(image()) {
+    <img [src]="image()" [alt]="title()" class="empty-state-image" />
+  } @else {
+    <div class="empty-state-icon">{{ icon() }}</div>
+  }
+
+  <h2 class="empty-state-title">{{ title() }}</h2>
+  <p class="empty-state-message">{{ message() }}</p>
+
+  <!-- Botón opcional -->
+  @if(actionText() && actionLink()) {
+    <a [routerLink]="actionLink()" class="empty-state-action">
+      {{ actionText() }}
+    </a>
+  }
+</div>

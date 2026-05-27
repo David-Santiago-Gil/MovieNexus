@@ -89,7 +89,18 @@
           }
         </section>
 
-        <button class="back-button" onclick="history.back()">← Volver</button>
+        <div class="details-actions">
+          <button class="back-button" onclick="history.back()">← Volver</button>
+          <button class="favorite-btn-details" 
+                  [class.active]="favoritesService.isFavorite(data.details.id)"
+                  (click)="toggleFavorite(data.details)">
+            @if (favoritesService.isFavorite(data.details.id)) {
+              <span class="heart-icon">❤️</span> Quitar de favoritos
+            } @else {
+              <span class="heart-icon">🤍</span> Añadir a favoritos
+            }
+          </button>
+        </div>
     </div>
   </div>
 } @else {

@@ -16,7 +16,7 @@ export const routes: Routes = [
     title: 'Mis Favoritos | MovieNexus'
   },
   {
-    path: '**',
-    redirectTo: ''
+    path: '**', // Atrapa TODO lo que no exista
+    loadComponent: () => import('./features/not-found/not-found').then(m => m.NotFound)
   }
 ];

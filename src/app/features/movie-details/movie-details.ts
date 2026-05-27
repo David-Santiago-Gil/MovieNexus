@@ -6,6 +6,7 @@ import { CastCard } from '../../shared/components/cast-card/cast-card';
 import { MovieTrailer } from './components/movie-trailer/movie-trailer';
 import { Observable, forkJoin } from 'rxjs'; // Importamos RxJS
 import { CreditsResponse } from '../../core/models/cast.model';
+import { FavoritesService } from '../../core/services/favorites.service';
 
 @Component({
   selector: 'app-movie-details',
@@ -16,6 +17,7 @@ import { CreditsResponse } from '../../core/models/cast.model';
 })
 export class MovieDetails implements OnInit {
   private movieService = inject(MovieService);
+  public favoritesService = inject(FavoritesService);
   @Input() id!: string;
 
   // Declaramos un Observable que contendrá TODOS los datos que necesitamos
@@ -33,5 +35,9 @@ export class MovieDetails implements OnInit {
 
   getBackdropUrl(path: string | null | undefined): string {
     return path ? `https://image.tmdb.org/t/p/original${path}` : '';
+  }
+
+  toggleFavorite(movie: Movie): void {
+    this.favoritesService.toggleFavorite(movie);
   }
 }
