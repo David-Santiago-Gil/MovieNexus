@@ -1,7 +1,22 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist/MovieNexus/browser",
+  "headers": [
+    {
+      "source": "/(.*)/(ngsw-worker\\.js|ngsw\\.json)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    }
+  ],
   "rewrites": [
+    {
+      "source": "/api/tmdb/(.*)",
+      "destination": "/api/tmdb.js?splat=$1"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

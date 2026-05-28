@@ -30,10 +30,21 @@
             "security": {
               "allowedHosts": []
             },
-            "ssr": false
+            "ssr": false,
+            "serviceWorker": "ngsw-config.json"
           },
           "configurations": {
             "production": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": true
+                },
+                "fonts": {
+                  "inline": false
+                }
+              },
               "budgets": [
                 {
                   "type": "initial",
