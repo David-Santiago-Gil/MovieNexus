@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CastMember } from '../../../core/models/cast.model';
 
@@ -7,7 +7,8 @@ import { CastMember } from '../../../core/models/cast.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './cast-card.html',
-  styleUrl: './cast-card.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './cast-card.css',
 })
 export class CastCard {
   @Input({ required: true }) actor!: CastMember;

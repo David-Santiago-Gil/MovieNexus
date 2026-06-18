@@ -1,9 +1,10 @@
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, inject, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MovieService } from '../../core/services/movie.service';
 import { Movie } from '../../core/models/movie.model';
 import { CastCard } from '../../shared/components/cast-card/cast-card';
 import { MovieTrailer } from './components/movie-trailer/movie-trailer';
+import { MovieComments } from './components/movie-comments/movie-comments';
 import { Observable, forkJoin } from 'rxjs'; // Importamos RxJS
 import { CreditsResponse } from '../../core/models/cast.model';
 import { FavoritesService } from '../../core/services/favorites.service';
@@ -11,9 +12,10 @@ import { FavoritesService } from '../../core/services/favorites.service';
 @Component({
   selector: 'app-movie-details',
   standalone: true,
-  imports: [CommonModule, CastCard, MovieTrailer], // No olvides importar CastCard y MovieTrailer
+  imports: [CommonModule, CastCard, MovieTrailer, MovieComments], // No olvides importar CastCard y MovieTrailer
   templateUrl: './movie-details.html',
-  styleUrl: './movie-details.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './movie-details.css',
 })
 export class MovieDetails implements OnInit {
   private movieService = inject(MovieService);
@@ -28,7 +30,7 @@ export class MovieDetails implements OnInit {
       // forkJoin dispara ambas peticiones al mismo tiempo y crea un objeto con los dos resultados
       this.movieData$ = forkJoin({
         details: this.movieService.getMovieById(this.id),
-        credits: this.movieService.getMovieCredits(this.id)
+        credits: this.movieService.getMovieCredits(this.id),
       });
     }
   }

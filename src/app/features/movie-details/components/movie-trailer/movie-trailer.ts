@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit, signal } from '@angular/core';
+import { Component, inject, Input, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MovieService } from '../../../../core/services/movie.service';
 import { SafePipe } from '../../../../shared/pipes/safe.pipe';
@@ -16,7 +16,8 @@ import { SafePipe } from '../../../../shared/pipes/safe.pipe';
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen
-          class="trailer-iframe">
+          class="trailer-iframe"
+        >
         </iframe>
       </div>
     } @else {
@@ -26,7 +27,8 @@ import { SafePipe } from '../../../../shared/pipes/safe.pipe';
       </div>
     }
   `,
-  styleUrl: './movie-trailer.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './movie-trailer.css',
 })
 export class MovieTrailer implements OnInit {
   private movieService = inject(MovieService);
@@ -40,12 +42,12 @@ export class MovieTrailer implements OnInit {
         next: (data) => {
           // Buscamos el tráiler oficial de YouTube
           const trailer = data.results.find(
-            v => v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser')
+            (v) => v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser'),
           );
           if (trailer) {
             this.trailerKey.set(trailer.key);
           }
-        }
+        },
       });
     }
   }

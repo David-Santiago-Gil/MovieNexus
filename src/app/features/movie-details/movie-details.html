@@ -101,6 +101,21 @@
             }
           </button>
         </div>
+
+        <!-- CARGA DIFERIDA: Sección de Comentarios (on viewport) -->
+        <section class="comments-container">
+          @defer (on viewport) {
+            <!-- Se carga automáticamente cuando este espacio entra en el viewport del navegador -->
+            <app-movie-comments [movieId]="data.details.id"></app-movie-comments>
+          } @placeholder {
+            <!-- Se muestra antes de que cargue el componente -->
+            <div class="comments-loading-placeholder">
+              <p>📝 Scroll hacia abajo para ver y dejar comentarios...</p>
+            </div>
+          } @loading {
+            <div class="defer-spinner">Cargando sección de comentarios...</div>
+          }
+        </section>
     </div>
   </div>
 } @else {

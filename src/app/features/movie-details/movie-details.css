@@ -218,6 +218,24 @@
   font-weight: bold;
 }
 
+/* === Sección de Comentarios === */
+.comments-container {
+  margin-top: 1rem;
+  margin-bottom: 3rem;
+}
+
+.comments-loading-placeholder {
+  height: 120px;
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  color: #555;
+  font-size: 0.95rem;
+}
+
 /* ==========================================================================
    DISEÑO PREMIUM DE CABECERA CON PÓSTER E INFO (FLEX SPLIT)
    ========================================================================== */

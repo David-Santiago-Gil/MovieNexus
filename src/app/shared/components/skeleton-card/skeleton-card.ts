@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-skeleton-card',
@@ -12,6 +12,7 @@ import { Component } from '@angular/core';
       </div>
     </div>
   `,
-  styleUrl: './skeleton-card.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './skeleton-card.css',
 })
 export class SkeletonCard {}

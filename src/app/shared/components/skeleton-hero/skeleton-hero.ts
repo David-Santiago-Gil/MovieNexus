@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-skeleton-hero',
@@ -15,6 +15,7 @@ import { Component } from '@angular/core';
       </div>
     </div>
   `,
-  styleUrl: './skeleton-hero.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './skeleton-hero.css',
 })
 export class SkeletonHero {}

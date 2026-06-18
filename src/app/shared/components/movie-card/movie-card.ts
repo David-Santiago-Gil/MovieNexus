@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Movie } from '../../../core/models/movie.model';
@@ -9,7 +9,8 @@ import { FavoritesService } from '../../../core/services/favorites.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './movie-card.html',
-  styleUrl: './movie-card.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './movie-card.css',
 })
 export class MovieCard {
   // Obligamos a que el componente padre SIEMPRE pase una película

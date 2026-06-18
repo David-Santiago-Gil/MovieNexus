@@ -1,0 +1,78 @@
+<section class="comments-section">
+  <div class="comments-header">
+    <h2>💬 Comentarios de Alumnos</h2>
+    <button class="add-comment-btn" (click)="toggleForm()">
+      {{ showForm ? '✕ Cancelar' : '+ Escribir comentario' }}
+    </button>
+  </div>
+
+  @if (successMessage) {
+    <div class="success-banner">{{ successMessage }}</div>
+  }
+
+  <!-- Formulario -->
+  @if (showForm) {
+    <div class="comment-form-card">
+      <h3>Nuevo Comentario</h3>
+
+      <div class="form-group">
+        <label for="author-name">Tu Nombre completo</label>
+        <input id="author-name" type="text" placeholder="Ej: Camila Silva..." [(ngModel)]="authorName">
+      </div>
+
+      <div class="form-group">
+        <label>Calificación</label>
+        <div class="star-selector">
+          @for (star of [1, 2, 3, 4, 5]; track star) {
+            <button
+              class="star-btn"
+              [class.active]="star <= selectedRating"
+              (click)="setRating(star)"
+              type="button">
+              ★
+            </button>
+          }
+          <span class="rating-text">{{ selectedRating }} de 5</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="comment-text">Tu Comentario</label>
+        <textarea id="comment-text" placeholder="¿Qué te pareció?" [(ngModel)]="commentText" rows="3"></textarea>
+      </div>
+
+      <button
+        class="submit-btn"
+        (click)="submitComment()"
+        [disabled]="submitting || !authorName.trim() || !commentText.trim()">
+        {{ submitting ? 'Enviando...' : 'Publicar Comentario' }}
+      </button>
+    </div>
+  }
+
+  <!-- Lista de Comentarios -->
+  @if (loading) {
+    <div class="loading">Cargando comentarios...</div>
+  } @else {
+    @if (comments.length === 0) {
+      <div class="no-comments">No hay comentarios aún. ¡Escribe el tuyo!</div>
+    } @else {
+      <div class="comments-list">
+        @for (comment of comments; track comment.id) {
+          <div class="comment-card">
+            <div class="comment-top">
+              <span class="comment-author">{{ comment.author }}</span>
+              <span>{{ comment.createdAt | date:'short' }}</span>
+              <span class="comment-rating">⭐ {{ comment.rating }}</span>
+            </div>
+            <p class="comment-text">{{ comment.text }}</p>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  @if (error) {
+    <div class="error-msg">{{ error }}</div>
+  }
+</section>

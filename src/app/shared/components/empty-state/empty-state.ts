@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -6,7 +6,8 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [RouterLink], // Importamos RouterLink para el botón de acción
   templateUrl: './empty-state.html',
-  styleUrl: './empty-state.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './empty-state.css',
 })
 export class EmptyStateComponent {
   icon = input<string>('🔍'); // Ícono por defecto
