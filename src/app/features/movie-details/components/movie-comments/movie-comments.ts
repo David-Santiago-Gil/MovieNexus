@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommentService } from '../../../../core/services/comment.service';
 import { Comment } from '../../../../core/models/comment.model';
+import { finalize, timeout } from 'rxjs';
 
 @Component({
   selector: 'app-movie-comments',
@@ -41,18 +42,20 @@ export class MovieComments implements OnInit {
   loadComments(): void {
     this.loading = true;
     this.error = '';
-    this.commentService.getComments(this.itemId).subscribe({
+    this.commentService.getComments(this.itemId).pipe(
+      timeout(10000),
+      finalize(() => {
+        this.loading = false;
+        this.cdr.markForCheck();
+      })
+    ).subscribe({
       next: (data) => {
         this.comments = data.sort(
           (a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()
         );
-        this.loading = false;
-        this.cdr.markForCheck(); // Notifica a Angular que el estado cambió
       },
       error: () => {
         this.error = 'No se pudieron cargar los comentarios. Asegúrate de que la API está activa.';
-        this.loading = false;
-        this.cdr.markForCheck();
       }
     });
   }
@@ -69,12 +72,21 @@ export class MovieComments implements OnInit {
   submitComment(): void {
     if (!this.authorName.trim() || !this.commentText.trim()) return;
     this.submitting = true;
+    this.error = '';
+    this.cdr.markForCheck();
 
     this.commentService.addComment(
       this.itemId,
       this.authorName.trim(),
       this.commentText.trim(),
       this.selectedRating
+    ).pipe(
+      timeout(10000),  // Si en 10s no hay respuesta, fuerza el error
+      finalize(() => {
+        // Siempre se ejecuta: tanto en éxito como en error
+        this.submitting = false;
+        this.cdr.markForCheck(); // Garantiza que el botón salga del estado "Enviando..."
+      })
     ).subscribe({
       next: (newComment) => {
         this.comments.unshift(newComment);
@@ -82,18 +94,15 @@ export class MovieComments implements OnInit {
         this.commentText = '';
         this.selectedRating = 5;
         this.showForm = false;
-        this.submitting = false;
         this.successMessage = '¡Comentario publicado exitosamente! ✅';
-        this.cdr.markForCheck(); // Actualiza la vista inmediatamente tras publicar
+        this.cdr.markForCheck();
         setTimeout(() => {
           this.successMessage = '';
-          this.cdr.markForCheck(); // Limpia el banner de éxito en la vista
+          this.cdr.markForCheck();
         }, 3000);
       },
       error: () => {
-        this.submitting = false;
         this.error = 'Error al publicar. Reintenta de nuevo.';
-        this.cdr.markForCheck();
       }
     });
   }
