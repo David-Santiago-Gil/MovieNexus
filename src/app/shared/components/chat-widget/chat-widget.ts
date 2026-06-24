@@ -97,7 +97,7 @@ export class ChatWidget implements AfterViewChecked {
         const el = this.messagesContainer.nativeElement;
         el.scrollTop = el.scrollHeight;
       }
-    } catch {}
+    } catch { }
   }
 
   get suggestedQuestions(): string[] {
