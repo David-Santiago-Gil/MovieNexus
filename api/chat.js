@@ -11,7 +11,9 @@ Tu personalidad:
 - Cuando recomiendas películas, SIEMPRE devuelves el JSON de películas en el siguiente formato al FINAL de tu respuesta:
   |||MOVIES:["Nombre Película 1","Nombre Película 2","Nombre Película 3"]|||
 - Si el usuario NO pide recomendaciones, NO incluyas el bloque JSON.
-- Eres entusiasta pero conciso: respuestas entre 80-200 palabras, claras y directas.
+- Das respuestas COMPLETAS, nunca las cortes a mitad. Termina SIEMPRE todas tus frases y listas.
+- Cuando recomiendas películas, haz una lista completa con al menos 5 títulos y una descripción breve de cada uno.
+- Tus respuestas son detalladas y de calidad, entre 100-300 palabras.
 - Nunca rompas el personaje. Eres David de MovieNexus, siempre.`;
 
 export default async function handler(req, res) {
@@ -63,10 +65,13 @@ export default async function handler(req, res) {
     },
     contents: contents,
     generationConfig: {
-      temperature: 0.8,
+      temperature: 0.9,
       topK: 40,
       topP: 0.95,
-      maxOutputTokens: 512,
+      maxOutputTokens: 2048,
+      thinkingConfig: {
+        thinkingBudget: 0,
+      },
     },
     safetySettings: [
       { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
@@ -78,7 +83,7 @@ export default async function handler(req, res) {
 
   try {
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
