@@ -98,7 +98,18 @@
             <p class="message-text" [innerHTML]="formatText(msg.text)"></p>
 
             <!-- Carrusel de películas recomendadas -->
-            @if (msg.movies && msg.movies.length > 0) {
+            @if (msg.resolvedMovies && msg.resolvedMovies.length > 0) {
+              <div class="movie-carousel-container">
+                <span class="movie-carousel-label">🎬 Películas en TMDB:</span>
+                <div class="movie-carousel-list">
+                  @for (movie of msg.resolvedMovies; track movie.id) {
+                    <div class="chat-movie-card-wrapper">
+                      <app-movie-card [movie]="movie"></app-movie-card>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else if (msg.movies && msg.movies.length > 0) {
               <div class="movie-chips-container">
                 <span class="movie-chips-label">🎬 Películas mencionadas:</span>
                 <div class="movie-chips">

@@ -157,6 +157,59 @@
 .typing-dot:nth-child(2){animation-delay:.2s} .typing-dot:nth-child(3){animation-delay:.4s}
 @keyframes tdot { 0%,80%,100%{transform:scale(.65);opacity:.4} 40%{transform:scale(1.15);opacity:1} }
 
+
+/* ---- MOVIE CAROUSEL ---- */
+.movie-carousel-container {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+}
+.movie-carousel-label {
+  display: block;
+  font-size: 11px;
+  color: var(--ctm);
+  margin-bottom: 8px;
+  font-weight: 600;
+  letter-spacing: .3px;
+}
+.movie-carousel-list {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 4px 2px 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(229, 9, 20, 0.5) rgba(255, 255, 255, 0.03);
+}
+.movie-carousel-list::-webkit-scrollbar {
+  height: 4px;
+}
+.movie-carousel-list::-webkit-scrollbar-thumb {
+  background: rgba(229, 9, 20, 0.5);
+  border-radius: 2px;
+}
+.chat-movie-card-wrapper {
+  flex: 0 0 120px;
+  width: 120px;
+}
+.chat-movie-card-wrapper ::ng-deep .movie-card {
+  width: 100% !important;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+.chat-movie-card-wrapper ::ng-deep .movie-card .movie-title {
+  font-size: 0.75rem !important;
+}
+.chat-movie-card-wrapper ::ng-deep .movie-card .movie-rating {
+  font-size: 0.7rem !important;
+}
+.chat-movie-card-wrapper ::ng-deep .movie-card .favorite-btn {
+  width: 28px !important;
+  height: 28px !important;
+  top: 6px !important;
+  right: 6px !important;
+}
+
 /* ---- MOVIE CHIPS ---- */
 .movie-chips-container { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.07); }
 .movie-chips-label { display: block; font-size: 11px; color: var(--ctm); margin-bottom: 7px; font-weight: 600; letter-spacing: .3px; }

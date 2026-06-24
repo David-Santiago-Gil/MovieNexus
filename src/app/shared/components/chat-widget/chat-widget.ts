@@ -12,11 +12,12 @@ import { FormsModule } from '@angular/forms';
 import { GeminiService, ChatMessage } from '../../../core/services/gemini.service';
 import { MovieService } from '../../../core/services/movie.service';
 import { RouterModule } from '@angular/router';
+import { MovieCard } from '../movie-card/movie-card';
 
 @Component({
   selector: 'app-chat-widget',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, MovieCard],
   templateUrl: './chat-widget.html',
   styleUrl: './chat-widget.css',
   changeDetection: ChangeDetectionStrategy.Default,

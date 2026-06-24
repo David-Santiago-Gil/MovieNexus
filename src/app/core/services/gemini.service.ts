@@ -1,12 +1,15 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { Movie } from '../models/movie.model';
+import { MovieService } from './movie.service';
 
 export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
   timestamp: Date;
   movies?: string[];
+  resolvedMovies?: Movie[];
 }
 
 export interface GeminiResponse {
@@ -18,6 +21,8 @@ export interface GeminiResponse {
 })
 export class GeminiService {
   private readonly API_URL = '/api/chat';
+  private http = inject(HttpClient);
+  private movieService = inject(MovieService);
 
   // Estado reactivo con Signals
   private _messages = signal<ChatMessage[]>([]);
@@ -29,7 +34,7 @@ export class GeminiService {
   readonly error = this._error.asReadonly();
   readonly hasMessages = computed(() => this._messages().length > 0);
 
-  constructor(private http: HttpClient) {
+  constructor() {
     this.initWelcomeMessage();
   }
 
@@ -74,11 +79,32 @@ export class GeminiService {
       const movies = this.extractMovies(rawText);
       const cleanText = rawText.replace(/\|\|\|MOVIES:\[.*?\]\|\|\|/s, '').trim();
 
+      // Resolver títulos a objetos Movie desde la API de TMDB
+      let resolvedMovies: Movie[] = [];
+      if (movies.length > 0) {
+        const promises = movies.map(async (title) => {
+          try {
+            const searchRes = await firstValueFrom(this.movieService.searchMovies(title));
+            if (searchRes && searchRes.results && searchRes.results.length > 0) {
+              // Devolver el primer resultado que más coincida
+              return searchRes.results[0];
+            }
+          } catch (e) {
+            console.error('Error buscando película:', title, e);
+          }
+          return null;
+        });
+
+        const results = await Promise.all(promises);
+        resolvedMovies = results.filter((m): m is Movie => m !== null);
+      }
+
       const modelMsg: ChatMessage = {
         role: 'model',
         text: cleanText,
         timestamp: new Date(),
         movies: movies.length > 0 ? movies : undefined,
+        resolvedMovies: resolvedMovies.length > 0 ? resolvedMovies : undefined,
       };
 
       this._messages.update((msgs) => [...msgs, modelMsg]);
