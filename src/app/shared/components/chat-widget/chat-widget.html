@@ -1,0 +1,164 @@
+<div class="chat-widget-container">
+  <!-- Botón flotante -->
+  <button
+    class="chat-fab"
+    (click)="toggleChat()"
+    [class.is-open]="isOpen()"
+    aria-label="Abrir asistente de MovieNexus"
+    id="chat-fab-button"
+  >
+    <span class="fab-icon" [class.hide]="isOpen()">
+      <!-- Icono chat -->
+      <svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26">
+        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+        <circle cx="8" cy="11" r="1.2" fill="currentColor"/>
+        <circle cx="12" cy="11" r="1.2" fill="currentColor"/>
+        <circle cx="16" cy="11" r="1.2" fill="currentColor"/>
+      </svg>
+    </span>
+    <span class="fab-icon close-icon" [class.show]="isOpen()">
+      <!-- Icono X -->
+      <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+      </svg>
+    </span>
+    <!-- Indicador de pulso -->
+    <span class="fab-pulse" [class.hide]="isOpen()"></span>
+  </button>
+
+  <!-- Panel del chat -->
+  <div class="chat-panel" [class.is-visible]="isOpen()">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="chat-header-avatar">
+        <span class="avatar-letter">D</span>
+        <span class="avatar-online"></span>
+      </div>
+      <div class="chat-header-info">
+        <h3 class="chat-header-name">David</h3>
+        <span class="chat-header-status">Asistente de MovieNexus · En línea</span>
+      </div>
+      <div class="chat-header-actions">
+        <button class="header-action-btn" (click)="clearChat()" title="Nueva conversación" id="clear-chat-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+            <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+          </svg>
+        </button>
+        <button class="header-action-btn" (click)="closeChat()" title="Cerrar" id="close-chat-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Área de mensajes -->
+    <div class="chat-messages" #messagesContainer>
+      @for (msg of geminiService.messages(); track trackByIndex($index, msg)) {
+        <div class="message-wrapper" [class.user-wrapper]="msg.role === 'user'">
+          <!-- Avatar del modelo -->
+          @if (msg.role === 'model') {
+            <div class="msg-avatar model-avatar">
+              <span>D</span>
+            </div>
+          }
+
+          <div class="message-bubble" [class.user-bubble]="msg.role === 'user'" [class.model-bubble]="msg.role === 'model'">
+            <p class="message-text" [innerHTML]="formatText(msg.text)"></p>
+
+            <!-- Carrusel de películas recomendadas -->
+            @if (msg.movies && msg.movies.length > 0) {
+              <div class="movie-chips-container">
+                <span class="movie-chips-label">🎬 Películas mencionadas:</span>
+                <div class="movie-chips">
+                  @for (movie of msg.movies; track movie) {
+                    <a [routerLink]="['/search']" [queryParams]="{q: movie}" class="movie-chip">
+                      {{ movie }}
+                    </a>
+                  }
+                </div>
+              </div>
+            }
+
+            <span class="message-time">
+              {{ msg.timestamp | date: 'HH:mm' }}
+            </span>
+          </div>
+
+          <!-- Avatar del usuario -->
+          @if (msg.role === 'user') {
+            <div class="msg-avatar user-avatar">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+              </svg>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Indicador de carga (typing) -->
+      @if (geminiService.loading()) {
+        <div class="message-wrapper">
+          <div class="msg-avatar model-avatar">
+            <span>D</span>
+          </div>
+          <div class="message-bubble model-bubble typing-bubble">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+      }
+
+      <!-- Error banner -->
+      @if (geminiService.error()) {
+        <div class="error-banner">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+          {{ geminiService.error() }}
+        </div>
+      }
+    </div>
+
+    <!-- Sugerencias rápidas (solo cuando hay 1 mensaje = bienvenida) -->
+    @if (geminiService.messages().length === 1) {
+      <div class="quick-suggestions">
+        @for (q of suggestedQuestions; track q) {
+          <button class="suggestion-chip" (click)="sendSuggestion(q)" [id]="'suggestion-' + $index">
+            {{ q }}
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Input area -->
+    <div class="chat-input-area">
+      <textarea
+        class="chat-input"
+        [(ngModel)]="userInput"
+        (keydown)="onKeydown($event)"
+        placeholder="Escríbeme algo... 🎬"
+        rows="1"
+        [disabled]="geminiService.loading()"
+        id="chat-input-textarea"
+      ></textarea>
+      <button
+        class="send-btn"
+        (click)="onSend()"
+        [disabled]="!userInput().trim() || geminiService.loading()"
+        id="send-message-btn"
+        aria-label="Enviar mensaje"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Footer del chat -->
+    <div class="chat-footer">
+      <span>Powered by <strong>Gemini AI</strong> · MovieNexus 🎬</span>
+    </div>
+  </div>
+</div>
