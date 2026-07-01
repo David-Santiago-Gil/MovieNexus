@@ -40,22 +40,22 @@ export class ChatWidget implements AfterViewChecked, OnDestroy {
   // ── Web Speech API ──────────────────────────────────────────────────────────
   private recognition: any = null;
 
-  /** Texto acumulado de resultados finales durante la sesión de voz */
+  /** Texto acumulado de resultados finales entre sesiones cortas de voz */
   private accumulatedText = '';
 
-  /** Timer de silencio: auto-envía tras 3 s sin voz */
+  /** Timer de silencio: auto-envía tras exactamente 600 ms sin voz */
   private silenceTimer: ReturnType<typeof setTimeout> | null = null;
   /** Timer de reinicio (con delay para que el navegador libere el mic) */
   private restartTimer:  ReturnType<typeof setTimeout> | null = null;
 
   /** Máximo de intentos consecutivos de reinicio antes de rendirse */
   private retryCount = 0;
-  private readonly MAX_RETRIES = 8;
+  private readonly MAX_RETRIES = 5;
 
-  /** Milisegundos de silencio antes de auto-enviar */
-  private readonly SILENCE_MS = 3000;
-  /** Delay base de reinicio (se multiplica con retryCount para backoff) */
-  private readonly BASE_RESTART_MS = 300;
+  /** Milisegundos de silencio tras hablar para auto-enviar (Requerimiento de 600ms) */
+  private readonly SILENCE_MS = 600;
+  /** Delay base de reinicio rápido */
+  private readonly BASE_RESTART_MS = 250;
 
   constructor() {}
 
@@ -75,7 +75,8 @@ export class ChatWidget implements AfterViewChecked, OnDestroy {
 
   /**
    * Inicializa y arranca la SpeechRecognition recreándola desde cero cada vez.
-   * Esto elimina por completo los bloqueos de estado del navegador ("already started" o locks internos).
+   * Usamos continuous = false para evitar saturación de red con los servidores de Google
+   * (lo que causa el error de 'network' inmediato en Chrome) y recreamos la sesión al vuelo.
    */
   private activateSpeechRecognition(): void {
     if (typeof window === 'undefined') return;
@@ -99,19 +100,19 @@ export class ChatWidget implements AfterViewChecked, OnDestroy {
 
     try {
       this.recognition = new SR();
-      this.recognition.continuous     = true;   // Escucha continua
+      this.recognition.continuous     = false;  // Evita el error 'network' de Chrome al no saturar la conexión
       this.recognition.interimResults = true;   // Texto en tiempo real
       this.recognition.lang           = navigator.language || 'es-ES';
       this.recognition.maxAlternatives = 1;
 
-      // ── onstart: el micrófono está escuchando ──────────────────────────────
+      // ── onstart ────────────────────────────────────────────────────────────
       this.recognition.onstart = () => {
         this.isListening.set(true);
       };
 
-      // ── onresult: procesando voz en tiempo real ───────────────────────────
+      // ── onresult ───────────────────────────────────────────────────────────
       this.recognition.onresult = (event: any) => {
-        this.retryCount = 0; // Se recibió voz con éxito -> Resetear contador de reintentos
+        this.retryCount = 0; // Resetear intentos al recibir datos exitosos
 
         let interim  = '';
         let finalTxt = '';
@@ -125,47 +126,50 @@ export class ChatWidget implements AfterViewChecked, OnDestroy {
           }
         }
 
-        // Acumular los fragmentos que ya son definitivos
         if (finalTxt) {
           this.accumulatedText = (this.accumulatedText + ' ' + finalTxt).trim();
         }
 
-        // Mostrar el texto final acumulado + el fragmento que se está procesando
         const display = interim
           ? (this.accumulatedText + ' ' + interim).trim()
           : this.accumulatedText;
 
         if (display) {
           this.userInput.set(display);
-          this.resetSilenceTimer(); // Reiniciar el temporizador para no enviar antes de tiempo
+          this.resetSilenceTimer(); // Iniciar/reiniciar el temporizador de 600ms
         }
       };
 
-      // ── onend: el navegador desconectó el micrófono ────────────────────────
+      // ── onend ──────────────────────────────────────────────────────────────
       this.recognition.onend = () => {
         if (this.isListening()) {
-          this.scheduleRestart(); // Re-instanciar automáticamente
+          this.scheduleRestart(); // Re-instanciar inmediatamente para continuar escuchando
         }
       };
 
-      // ── onerror: manejo robusto de excepciones de la API ──────────────────
+      // ── onerror ────────────────────────────────────────────────────────────
       this.recognition.onerror = (event: any) => {
-        // 'no-speech' y 'aborted' son normales cuando hay pausas largas o cancelaciones
+        // 'no-speech' y 'aborted' son normales cuando hay pausas o cancelaciones
         if (event.error === 'no-speech' || event.error === 'aborted') {
           return;
         }
 
         console.warn('SpeechRecognition error:', event.error);
 
-        // Mostrar mensajes descriptivos al usuario
         if (event.error === 'not-allowed') {
-          this.micError.set('Permiso de micrófono denegado. Actívalo en la barra del navegador.');
+          this.micError.set('Permiso de micrófono denegado. Actívalo en tu navegador.');
+          this.hardStop();
         } else if (event.error === 'audio-capture') {
-          this.micError.set('No se detectó un micrófono activo en tu dispositivo.');
+          this.micError.set('No se detectó un micrófono activo.');
+          this.hardStop();
+        } else if (event.error === 'network') {
+          // Si es un error de red, no detenemos del todo la escucha.
+          // Permitimos que onend intente reconectar silenciosamente con backoff.
+          console.warn('Error de red temporal de Speech API. Reintentando...');
         } else {
           this.micError.set(`Error de micrófono: ${event.error}`);
+          this.hardStop();
         }
-        this.hardStop();
       };
 
       this.recognition.start();
@@ -176,7 +180,7 @@ export class ChatWidget implements AfterViewChecked, OnDestroy {
     }
   }
 
-  // ── Reinicio automático con backoff exponencial ──────────────────────────────
+  // ── Reinicio automático con delay y backoff ──────────────────────────────────
 
   private scheduleRestart(): void {
     if (this.retryCount >= this.MAX_RETRIES) {
@@ -186,13 +190,13 @@ export class ChatWidget implements AfterViewChecked, OnDestroy {
 
     this.clearRestartTimer();
 
-    // Retardo progresivo: 300ms, 600ms, 900ms, 1200ms...
+    // Retardo progresivo corto
     const delay = this.BASE_RESTART_MS * (this.retryCount + 1);
 
     this.restartTimer = setTimeout(() => {
       if (!this.isListening()) return;
       this.retryCount++;
-      this.activateSpeechRecognition(); // Re-crear y arrancar
+      this.activateSpeechRecognition();
     }, delay);
   }
 
@@ -203,7 +207,7 @@ export class ChatWidget implements AfterViewChecked, OnDestroy {
     }
   }
 
-  // ── Timer de silencio (auto-envío) ───────────────────────────────────────────
+  // ── Timer de silencio de 600 ms (auto-envío) ─────────────────────────────────
 
   private resetSilenceTimer(): void {
     this.clearSilenceTimer();
@@ -223,7 +227,7 @@ export class ChatWidget implements AfterViewChecked, OnDestroy {
     }
   }
 
-  /** Detiene de forma controlada */
+  /** Detiene la grabación limpiamente */
   private stopListening(): void {
     this.isListening.set(false);
     this.clearSilenceTimer();
@@ -236,7 +240,7 @@ export class ChatWidget implements AfterViewChecked, OnDestroy {
     } catch {}
   }
 
-  /** Detiene inmediatamente por error sin limpiar la interfaz de forma abrupta */
+  /** Detiene de forma abrupta por error */
   private hardStop(): void {
     this.isListening.set(false);
     this.clearSilenceTimer();
