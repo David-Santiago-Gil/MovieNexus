@@ -29,128 +29,171 @@ export class ChatWidget implements AfterViewChecked, OnDestroy {
   geminiService: GeminiService = inject(GeminiService);
   movieService: MovieService = inject(MovieService);
 
-  isOpen    = signal(false);
-  userInput = signal('');
+  isOpen       = signal(false);
+  userInput    = signal('');
   movieResults = signal<Record<string, any[]>>({});
   isListening  = signal(false);
+  micError     = signal<string | null>(null);
 
   private shouldScrollToBottom = false;
 
   // ── Web Speech API ──────────────────────────────────────────────────────────
   private recognition: any = null;
 
-  /** Texto acumulado de sesiones previas (cada onend resetea la sesión interna) */
+  /** Texto acumulado de resultados finales durante la sesión de voz */
   private accumulatedText = '';
 
-  /** Timer para auto-envío después de silencio prolongado */
+  /** Timer de silencio: auto-envía tras 3 s sin voz */
   private silenceTimer: ReturnType<typeof setTimeout> | null = null;
-  /** Timer para reiniciar el recognition con un pequeño delay */
-  private restartTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Timer de reinicio (con delay para que el navegador libere el mic) */
+  private restartTimer:  ReturnType<typeof setTimeout> | null = null;
 
-  /**
-   * Tiempo de silencio tras el ÚLTIMO resultado de voz antes de auto-enviar.
-   * 3000 ms = 3 segundos — suficiente para pausas naturales entre palabras.
-   */
-  private readonly SILENCE_AFTER_SPEECH_MS = 3000;
+  /** Máximo de intentos consecutivos de reinicio antes de rendirse */
+  private retryCount = 0;
+  private readonly MAX_RETRIES = 8;
 
-  /** Pequeño delay antes de reiniciar la sesión (evita el error "already started") */
-  private readonly RESTART_DELAY_MS = 200;
+  /** Milisegundos de silencio antes de auto-enviar */
+  private readonly SILENCE_MS = 3000;
+  /** Delay base de reinicio (se multiplica con retryCount para backoff) */
+  private readonly BASE_RESTART_MS = 300;
 
-  constructor() {
-    this.initSpeechRecognition();
+  constructor() {}
+
+  // ── API pública del micrófono ─────────────────────────────────────────────────
+
+  toggleMicrophone(): void {
+    if (this.isListening()) {
+      this.stopListening();
+    } else {
+      this.micError.set(null);
+      this.accumulatedText = '';
+      this.retryCount = 0;
+      this.isListening.set(true);
+      this.activateSpeechRecognition();
+    }
   }
 
-  // ── Inicialización ───────────────────────────────────────────────────────────
-
   /**
-   * Inicializa el SpeechRecognition.
-   * Guard `typeof window === 'undefined'` protege el entorno SSR.
-   *
-   * Usamos continuous = FALSE porque en Chrome/Edge es más fiable:
-   * cada "frase" dispara onend y nosotros reiniciamos manualmente.
-   * Así el micrófono nunca se corta inesperadamente para el usuario.
+   * Inicializa y arranca la SpeechRecognition recreándola desde cero cada vez.
+   * Esto elimina por completo los bloqueos de estado del navegador ("already started" o locks internos).
    */
-  private initSpeechRecognition(): void {
+  private activateSpeechRecognition(): void {
     if (typeof window === 'undefined') return;
 
-    const SR = (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition;
-    if (!SR) return;
+    const SR =
+      (window as any).SpeechRecognition ??
+      (window as any).webkitSpeechRecognition;
 
-    this.recognition = new SR();
-    this.recognition.continuous      = false;  // más fiable en Chrome
-    this.recognition.interimResults  = true;   // texto en tiempo real
-    this.recognition.lang            = navigator.language || 'es-ES';
-    this.recognition.maxAlternatives = 1;
+    if (!SR) {
+      this.micError.set('Reconocimiento de voz no soportado en este navegador.');
+      this.isListening.set(false);
+      return;
+    }
 
-    // ── onresult: texto detectado ───────────────────────────────────────────
-    this.recognition.onresult = (event: any) => {
-      let interim  = '';
-      let finalTxt = '';
+    // Detener cualquier instancia previa existente por seguridad
+    try {
+      if (this.recognition) {
+        this.recognition.abort();
+      }
+    } catch {}
 
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const t = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTxt += t;
-        } else {
-          interim += t;
+    try {
+      this.recognition = new SR();
+      this.recognition.continuous     = true;   // Escucha continua
+      this.recognition.interimResults = true;   // Texto en tiempo real
+      this.recognition.lang           = navigator.language || 'es-ES';
+      this.recognition.maxAlternatives = 1;
+
+      // ── onstart: el micrófono está escuchando ──────────────────────────────
+      this.recognition.onstart = () => {
+        this.isListening.set(true);
+      };
+
+      // ── onresult: procesando voz en tiempo real ───────────────────────────
+      this.recognition.onresult = (event: any) => {
+        this.retryCount = 0; // Se recibió voz con éxito -> Resetear contador de reintentos
+
+        let interim  = '';
+        let finalTxt = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const t = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTxt += t;
+          } else {
+            interim += t;
+          }
         }
-      }
 
-      if (finalTxt) {
-        // Añadir al texto acumulado cuando el segmento es definitivo
-        this.accumulatedText = (this.accumulatedText + ' ' + finalTxt).trim();
-      }
+        // Acumular los fragmentos que ya son definitivos
+        if (finalTxt) {
+          this.accumulatedText = (this.accumulatedText + ' ' + finalTxt).trim();
+        }
 
-      // Mostrar en el input: texto acumulado + lo que se está detectando ahora
-      const display = interim
-        ? (this.accumulatedText + ' ' + interim).trim()
-        : this.accumulatedText;
+        // Mostrar el texto final acumulado + el fragmento que se está procesando
+        const display = interim
+          ? (this.accumulatedText + ' ' + interim).trim()
+          : this.accumulatedText;
 
-      if (display) {
-        this.userInput.set(display);
-      }
+        if (display) {
+          this.userInput.set(display);
+          this.resetSilenceTimer(); // Reiniciar el temporizador para no enviar antes de tiempo
+        }
+      };
 
-      // Reiniciar el timer de silencio cada vez que llegue voz
-      this.resetSilenceTimer();
-    };
+      // ── onend: el navegador desconectó el micrófono ────────────────────────
+      this.recognition.onend = () => {
+        if (this.isListening()) {
+          this.scheduleRestart(); // Re-instanciar automáticamente
+        }
+      };
 
-    // ── onend: el navegador cerró la sesión (ocurre siempre tras una frase) ──
-    this.recognition.onend = () => {
-      if (!this.isListening()) return; // El usuario lo cerró manualmente → no reiniciar
+      // ── onerror: manejo robusto de excepciones de la API ──────────────────
+      this.recognition.onerror = (event: any) => {
+        // 'no-speech' y 'aborted' son normales cuando hay pausas largas o cancelaciones
+        if (event.error === 'no-speech' || event.error === 'aborted') {
+          return;
+        }
 
-      // Reiniciar con un pequeño delay para que el navegador libere el micrófono
-      this.scheduleRestart();
-    };
+        console.warn('SpeechRecognition error:', event.error);
 
-    // ── onerror ─────────────────────────────────────────────────────────────
-    this.recognition.onerror = (event: any) => {
-      if (event.error === 'no-speech') {
-        // Sin voz detectada: onend se disparará igual y reiniciará → ignorar
-        return;
-      }
-      if (event.error === 'aborted') {
-        // Abortado por nosotros (stopListening) → ignorar
-        return;
-      }
-      // Error real: detener
-      console.warn('SpeechRecognition error:', event.error);
+        // Mostrar mensajes descriptivos al usuario
+        if (event.error === 'not-allowed') {
+          this.micError.set('Permiso de micrófono denegado. Actívalo en la barra del navegador.');
+        } else if (event.error === 'audio-capture') {
+          this.micError.set('No se detectó un micrófono activo en tu dispositivo.');
+        } else {
+          this.micError.set(`Error de micrófono: ${event.error}`);
+        }
+        this.hardStop();
+      };
+
+      this.recognition.start();
+    } catch (e) {
+      console.warn('Error instanciando o iniciando SpeechRecognition:', e);
+      this.micError.set('No se pudo abrir el servicio de micrófono.');
       this.hardStop();
-    };
+    }
   }
 
-  // ── Reinicio automático ──────────────────────────────────────────────────────
+  // ── Reinicio automático con backoff exponencial ──────────────────────────────
 
   private scheduleRestart(): void {
+    if (this.retryCount >= this.MAX_RETRIES) {
+      this.hardStop();
+      return;
+    }
+
     this.clearRestartTimer();
+
+    // Retardo progresivo: 300ms, 600ms, 900ms, 1200ms...
+    const delay = this.BASE_RESTART_MS * (this.retryCount + 1);
+
     this.restartTimer = setTimeout(() => {
       if (!this.isListening()) return;
-      try {
-        this.recognition.start();
-      } catch {
-        // Si falla (ej: permiso revocado), detenemos
-        this.hardStop();
-      }
-    }, this.RESTART_DELAY_MS);
+      this.retryCount++;
+      this.activateSpeechRecognition(); // Re-crear y arrancar
+    }, delay);
   }
 
   private clearRestartTimer(): void {
@@ -170,7 +213,7 @@ export class ChatWidget implements AfterViewChecked, OnDestroy {
         this.stopListening();
         this.onSend();
       }
-    }, this.SILENCE_AFTER_SPEECH_MS);
+    }, this.SILENCE_MS);
   }
 
   private clearSilenceTimer(): void {
@@ -180,39 +223,30 @@ export class ChatWidget implements AfterViewChecked, OnDestroy {
     }
   }
 
-  // ── API pública del micrófono ─────────────────────────────────────────────────
-
-  toggleMicrophone(): void {
-    if (!this.recognition) return;
-    this.isListening() ? this.stopListening() : this.startListening();
-  }
-
-  private startListening(): void {
-    this.accumulatedText = ''; // Limpiar acumulado de la sesión anterior
-    try {
-      this.recognition.start();
-      this.isListening.set(true);
-    } catch (e) {
-      console.warn('Error al iniciar SpeechRecognition:', e);
-    }
-  }
-
-  /** Detiene la grabación y cancela todos los timers */
+  /** Detiene de forma controlada */
   private stopListening(): void {
-    this.isListening.set(false); // Marcar ANTES de llamar stop() para que onend no reinicie
+    this.isListening.set(false);
     this.clearSilenceTimer();
     this.clearRestartTimer();
-    try { this.recognition.abort(); } catch { /* ya detenido */ }
     this.accumulatedText = '';
+    try {
+      if (this.recognition) {
+        this.recognition.abort();
+      }
+    } catch {}
   }
 
-  /** Detiene sin limpiar accumulatedText (usado en errores) */
+  /** Detiene inmediatamente por error sin limpiar la interfaz de forma abrupta */
   private hardStop(): void {
     this.isListening.set(false);
     this.clearSilenceTimer();
     this.clearRestartTimer();
-    try { this.recognition.abort(); } catch { /* ya detenido */ }
     this.accumulatedText = '';
+    try {
+      if (this.recognition) {
+        this.recognition.abort();
+      }
+    } catch {}
   }
 
   // ── Resto del componente ──────────────────────────────────────────────────────
