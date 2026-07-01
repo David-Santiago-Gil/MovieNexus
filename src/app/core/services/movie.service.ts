@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { MovieResponse, Movie } from '../models/movie.model';
+import { MovieResponse, Movie, WatchProvidersResponse } from '../models/movie.model';
 import { CreditsResponse } from '../models/cast.model';
 //import { delay } from 'rxjs/operators'; // Descomentar para probar Skeleton Loaders
 
@@ -51,5 +51,13 @@ export class MovieService {
     return this.http.get<{ results: Array<{ key: string; site: string; type: string; name: string }> }>(
       `${this.apiUrl}/movie/${id}/videos`
     );
+  }
+
+  /**
+   * Obtiene los proveedores de streaming disponibles para una película.
+   * @param id ID de la película en TMDB
+   */
+  getWatchProviders(id: string | number) {
+    return this.http.get<WatchProvidersResponse>(`${this.apiUrl}/movie/${id}/watch/providers`);
   }
 }

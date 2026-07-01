@@ -15,3 +15,23 @@ export interface MovieResponse {
   page: number;
   total_pages: number;
 }
+
+// --- Interfaces para plataformas de streaming (TMDB Watch Providers) ---
+export interface WatchProvider {
+  logo_path: string;
+  provider_id: number;
+  provider_name: string;
+  display_priority: number;
+}
+
+export interface CountryProviders {
+  link?: string;
+  flatrate?: WatchProvider[]; // Suscripción
+  buy?: WatchProvider[];       // Compra
+  rent?: WatchProvider[];      // Renta
+}
+
+export interface WatchProvidersResponse {
+  id: number;
+  results: Record<string, CountryProviders>;
+}

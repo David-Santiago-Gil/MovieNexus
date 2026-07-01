@@ -47,6 +47,67 @@
           <p class="overview">{{ data.details.overview }}</p>
         </section>
 
+        <!-- SECCIÓN DE PROVEEDORES DE STREAMING -->
+        @if (data.providers) {
+          <section class="watch-providers-section">
+            <h2>Dónde Ver</h2>
+            <div class="providers-grid">
+
+              <!-- Suscripción -->
+              @if (data.providers.flatrate && data.providers.flatrate.length > 0) {
+                <div class="providers-group">
+                  <span class="providers-group-label">📺 Suscripción</span>
+                  <div class="providers-list">
+                    @for (provider of data.providers.flatrate; track provider.provider_id) {
+                      <a [href]="data.providers.link" target="_blank" rel="noopener noreferrer"
+                         class="provider-logo-wrapper" [title]="provider.provider_name">
+                        <img [src]="getProviderLogoUrl(provider.logo_path)"
+                             [alt]="provider.provider_name"
+                             class="provider-logo">
+                      </a>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Compra -->
+              @if (data.providers.buy && data.providers.buy.length > 0) {
+                <div class="providers-group">
+                  <span class="providers-group-label">🛒 Compra</span>
+                  <div class="providers-list">
+                    @for (provider of data.providers.buy; track provider.provider_id) {
+                      <a [href]="data.providers.link" target="_blank" rel="noopener noreferrer"
+                         class="provider-logo-wrapper" [title]="provider.provider_name">
+                        <img [src]="getProviderLogoUrl(provider.logo_path)"
+                             [alt]="provider.provider_name"
+                             class="provider-logo">
+                      </a>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Renta -->
+              @if (data.providers.rent && data.providers.rent.length > 0) {
+                <div class="providers-group">
+                  <span class="providers-group-label">🎬 Renta</span>
+                  <div class="providers-list">
+                    @for (provider of data.providers.rent; track provider.provider_id) {
+                      <a [href]="data.providers.link" target="_blank" rel="noopener noreferrer"
+                         class="provider-logo-wrapper" [title]="provider.provider_name">
+                        <img [src]="getProviderLogoUrl(provider.logo_path)"
+                             [alt]="provider.provider_name"
+                             class="provider-logo">
+                      </a>
+                    }
+                  </div>
+                </div>
+              }
+
+            </div>
+          </section>
+        }
+
         <!-- CARGA DIFERIDA: El Tráiler (on viewport) -->
         <section class="trailer-section">
           <h2>Tráiler Oficial</h2>
